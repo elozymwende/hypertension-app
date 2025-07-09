@@ -1,45 +1,67 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { useTheme } from '../global.js';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function TabsLayout() {
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: colors.tabBar,
+          borderTopColor: colors.border,
+          height: 60,
+        },
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? [styles.activeTab, { backgroundColor: colors.primary }] : styles.inactiveTab}>
+              <FontAwesome name="home" size={24} color={focused ? colors.primaryText : colors.tabIcon} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="history"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? [styles.activeTab, { backgroundColor: colors.primary }] : styles.inactiveTab}>
+              <FontAwesome name="history" size={24} color={focused ? colors.primaryText : colors.tabIcon} />
+            </View>
+          ),
+        }}
+      />
+      {/* --- ADD THIS NEW TAB --- */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <View style={focused ? [styles.activeTab, { backgroundColor: colors.primary }] : styles.inactiveTab}>
+              <FontAwesome name="user" size={24} color={focused ? colors.primaryText : colors.tabIcon} />
+            </View>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  activeTab: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inactiveTab: {
+    padding: 12,
+  },
+});
