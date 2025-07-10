@@ -8,13 +8,26 @@ export default function DoctorTabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        // --- HEADER STYLES ---
+        headerShown: true, // Set to true to show the header
+        headerStyle: {
+          backgroundColor: colors.background, // Dark background
+        },
+        headerTintColor: colors.text, // Light text
+        headerTitleStyle: {
+          fontFamily: 'Inter_700Bold', // Custom font
+        },
+
+        // --- TAB BAR STYLES ---
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.tabIcon,
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,
         },
+        tabBarLabelStyle: {
+            fontFamily: 'Inter_400Regular',
+        }
       }}
     >
       <Tabs.Screen
@@ -27,7 +40,7 @@ export default function DoctorTabsLayout() {
       <Tabs.Screen
         name="patients"
         options={{
-          title: 'Patients',
+          title: 'All Patients',
           tabBarIcon: ({ color }) => <FontAwesome5 name="users" size={24} color={color} />,
         }}
       />
@@ -35,17 +48,16 @@ export default function DoctorTabsLayout() {
         name="all_readings"
         options={{
           title: 'All Readings',
-          tabBarIcon: ({ color }) => <FontAwesome5 name="chart-line" size={24} color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome5 name="chart-bar" size={24} color={color} />,
         }}
       />
        <Tabs.Screen
         name="tips"
         options={{
-          title: 'Lifestyle Tips',
+          title: 'Manage Tips',
           tabBarIcon: ({ color }) => <FontAwesome5 name="leaf" size={24} color={color} />,
         }}
       />
-
       <Tabs.Screen
         name="profile"
         options={{

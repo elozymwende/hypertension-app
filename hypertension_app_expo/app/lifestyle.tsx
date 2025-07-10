@@ -63,6 +63,7 @@ export default function LifestyleScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 60,
   },
   listContainer: {
     padding: 20,

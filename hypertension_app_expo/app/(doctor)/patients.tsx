@@ -38,7 +38,6 @@ export default function PatientsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>All Patients</Text>
       
       {isLoading ? (
         <ActivityIndicator size="large" color={colors.primary} />
@@ -59,6 +58,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 60,
   },
   title: {
     fontSize: 24,

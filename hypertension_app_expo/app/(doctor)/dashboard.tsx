@@ -34,7 +34,6 @@ export default function DoctorDashboard() {
   return (
     <ScrollView style={{ backgroundColor: colors.background }}>
         <View style={styles.container}>
-            <Text style={[styles.title, { color: colors.text }]}>Doctor Dashboard</Text>
 
             <DashboardCard
                 title="Total Patients"
@@ -71,6 +70,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        paddingTop: 60,
         alignItems: 'center'
     },
     title: {

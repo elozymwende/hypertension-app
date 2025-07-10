@@ -83,7 +83,6 @@ export default function TipsManagementScreen() {
         <FlatList
             ListHeaderComponent={
                 <>
-                    <Text style={[styles.title, { color: colors.text }]}>Manage Lifestyle Tips</Text>
                     <View style={[styles.inputContainer, {backgroundColor: colors.card}]}>
                         <TextInput
                             style={[styles.input, { color: colors.text, borderColor: colors.border }]}
@@ -117,6 +116,7 @@ export default function TipsManagementScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 60,
   },
   title: {
     fontSize: 22,

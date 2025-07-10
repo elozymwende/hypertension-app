@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, Button, SafeAreaView, Alert, ActivityIndicator, Platform } from 'react-native';
+// Note: startOfDay and endOfDay are removed from this import
 import { getFirestore, collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useTheme } from './global.js';
 import { firebaseApp } from './global.js';
 import * as Notifications from 'expo-notifications';
-import DateTimePicker from '@react-native-community/datetimepicker'; // Import the new component
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function MedicationsScreen() {
   const { colors } = useTheme();
@@ -13,37 +14,62 @@ export default function MedicationsScreen() {
   const [medName, setMedName] = useState('');
   const [dosage, setDosage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-
-  // --- New state for the time picker ---
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedMed, setSelectedMed] = useState(null);
+  const [takenToday, setTakenToday] = useState([]);
   
   const auth = getAuth(firebaseApp);
   const user = auth.currentUser;
 
-  // Fetch medications from Firestore
   useEffect(() => {
-    // ... (useEffect logic remains the same)
     if (!user) {
       setIsLoading(false);
       return;
     }
     const db = getFirestore(firebaseApp);
-    const q = query(collection(db, "medications"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    
+    // Listener for medications
+    const medsQuery = query(collection(db, "medications"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+    const unsubscribeMeds = onSnapshot(medsQuery, (snapshot) => {
         const medsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setMedications(medsData);
         setIsLoading(false);
     });
-    return () => unsubscribe();
+
+    // --- THIS IS THE CORRECTED LOGIC ---
+    // Listener for today's medication log
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0); // Set to the beginning of the day
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999); // Set to the end of the day
+
+    const logQuery = query(
+        collection(db, "medication_log"), 
+        where("userId", "==", user.uid),
+        where("takenAt", ">=", todayStart),
+        where("takenAt", "<=", todayEnd)
+    );
+    const unsubscribeLogs = onSnapshot(logQuery, (snapshot) => {
+        const takenMeds = snapshot.docs.map(doc => doc.data().medicationId);
+        setTakenToday(takenMeds);
+    });
+
+    return () => {
+        unsubscribeMeds();
+        unsubscribeLogs();
+    };
   }, [user]);
 
-
-  // Save a new medication
   const handleAddMedication = async () => {
-    // ... (handleAddMedication logic remains the same)
-    if (medName.trim() === '' || dosage.trim() === '') return;
-    if (!user) return;
+    if (medName.trim() === '' || dosage.trim() === '') {
+      Alert.alert('Error', 'Please fill out both fields.');
+      return;
+    }
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in.');
+      return;
+    }
     try {
       const db = getFirestore(firebaseApp);
       await addDoc(collection(db, "medications"), {
@@ -54,10 +80,12 @@ export default function MedicationsScreen() {
       });
       setMedName('');
       setDosage('');
-    } catch (e) { console.error("Error adding medication: ", e); }
+    } catch (e) {
+      console.error("Error adding medication: ", e);
+      Alert.alert('Error', 'Could not save medication.');
+    }
   };
   
-  // --- Updated Reminder Logic ---
   const handleSetReminderPress = (medication) => {
     if (Platform.OS === 'web') {
       alert('Reminders can only be set on the mobile app.');
@@ -68,32 +96,28 @@ export default function MedicationsScreen() {
   };
 
   const onTimeChange = async (event, selectedDate) => {
-    setShowTimePicker(false); // Hide the picker
+    setShowTimePicker(false);
     if (event.type === 'set' && selectedDate && selectedMed) {
       const hour = selectedDate.getHours();
       const minute = selectedDate.getMinutes();
-
-      // Cancel any previous notifications for this med before setting a new one
-      // (Advanced feature, for now we'll just set a new one)
 
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "Medication Reminder! 💊",
           body: `It's time to take your ${selectedMed.name}.`,
+          sound: 'default',
         },
         trigger: {
           hour: hour,
           minute: minute,
-          repeats: true, // Make it a daily reminder
+          repeats: true,
         },
       });
       Alert.alert('Reminder Set', `You will be reminded daily at ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}.`);
     }
   };
-  
-  // Log that a medication was taken
+
   const handleMarkAsTaken = async (medication) => {
-    // ... (handleMarkAsTaken logic remains the same)
     if (!user) return;
     try {
         const db = getFirestore(firebaseApp);
@@ -104,31 +128,36 @@ export default function MedicationsScreen() {
             takenAt: serverTimestamp(),
         });
         Alert.alert('Logged!', `${medication.name} has been logged as taken.`);
-    } catch (error) { console.error("Error logging medication: ", error); }
+    } catch (error) {
+        console.error("Error logging medication: ", error);
+        Alert.alert('Error', 'Could not log medication.');
+    }
   };
   
-  const renderItem = ({ item }) => (
-    <View style={[styles.itemContainer, { backgroundColor: colors.card }]}>
-      <View style={styles.medInfo}>
-        <Text style={[styles.itemTitle, { color: colors.text }]}>{item.name}</Text>
-        <Text style={[styles.itemSubtitle, { color: colors.text }]}>{item.dosage}</Text>
-      </View>
-      <View style={styles.buttonGroup}>
-        <Button title="Taken" onPress={() => handleMarkAsTaken(item)} color="#5cb85c" />
-        <View style={{height: 5}} />
-        <Button title="Set Reminder" onPress={() => handleSetReminderPress(item)} color={colors.primary} />
-      </View>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const isTaken = takenToday.includes(item.id);
+    return (
+        <View style={[styles.itemContainer, { backgroundColor: colors.card }]}>
+        <View style={styles.medInfo}>
+            <Text style={[styles.itemTitle, { color: colors.text }]}>{item.name}</Text>
+            <Text style={[styles.itemSubtitle, { color: colors.text }]}>{item.dosage}</Text>
+        </View>
+        <View style={styles.buttonGroup}>
+            <Button title={isTaken ? "Logged ✔" : "Taken"} onPress={() => handleMarkAsTaken(item)} color={isTaken ? "gray" : "#5cb85c"} disabled={isTaken} />
+            <View style={{height: 5}} />
+            <Button title="Set Reminder" onPress={() => handleSetReminderPress(item)} color={colors.primary} />
+        </View>
+        </View>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.text }]}>My Medications</Text>
       
-      {/* ... (Form to add new medication remains the same) ... */}
       <View style={styles.inputContainer}>
-        <TextInput style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]} placeholder="Medication Name" placeholderTextColor="gray" value={medName} onChangeText={setMedName}/>
-        <TextInput style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]} placeholder="Dosage" placeholderTextColor="gray" value={dosage} onChangeText={setDosage} />
+        <TextInput style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]} placeholder="Medication Name (e.g., Lisinopril)" placeholderTextColor="gray" value={medName} onChangeText={setMedName}/>
+        <TextInput style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]} placeholder="Dosage (e.g., 10mg, once daily)" placeholderTextColor="gray" value={dosage} onChangeText={setDosage} />
         <Button title="Add Medication" onPress={handleAddMedication} color={colors.primary} />
       </View>
 
@@ -144,10 +173,8 @@ export default function MedicationsScreen() {
         />
       )}
 
-      {/* --- The Time Picker Modal --- */}
       {showTimePicker && (
         <DateTimePicker
-            testID="dateTimePicker"
             value={new Date()}
             mode={'time'}
             is24Hour={true}
@@ -159,11 +186,11 @@ export default function MedicationsScreen() {
   );
 }
 
-// ... (your styles remain here, no changes needed)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        paddingTop: 60,
     },
     title: {
         fontSize: 24,
@@ -172,8 +199,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     inputContainer: {
-        padding: 15,
-        borderRadius: 8,
+        backgroundColor: '#2D3748',
+        padding: 20,
+        borderRadius: 12,
         marginBottom: 20,
     },
     input: {
@@ -193,6 +221,7 @@ const styles = StyleSheet.create({
     },
     medInfo: {
         flex: 1,
+        marginRight: 10,
     },
     itemTitle: {
         fontSize: 18,
@@ -203,6 +232,5 @@ const styles = StyleSheet.create({
         marginTop: 5,
     },
     buttonGroup: {
-        marginLeft: 10,
     },
 });

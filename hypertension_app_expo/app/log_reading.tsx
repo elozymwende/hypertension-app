@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useTheme } from './global.js';
@@ -13,7 +13,6 @@ export default function LogReadingScreen() {
   const [diastolic, setDiastolic] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // This is the single, correct version of the function
   const handleSave = async () => {
     if (!systolic || !diastolic) {
       Alert.alert('Error', 'Please fill out both fields.');
@@ -36,7 +35,6 @@ export default function LogReadingScreen() {
           createdAt: serverTimestamp(),
         });
         
-        // Check for high blood pressure
         if (systolicValue >= 130 || diastolicValue >= 80) {
             Alert.alert(
                 "High Reading Alert", 
@@ -62,6 +60,7 @@ export default function LogReadingScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <Stack.Screen options={{ title: 'Log New Reading' }} />
       <Text style={[styles.title, { color: colors.text }]}>Log New Reading</Text>
 
       <TextInput
@@ -102,6 +101,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 30,
+    fontFamily: 'Inter_700Bold',
   },
   input: {
     height: 50,

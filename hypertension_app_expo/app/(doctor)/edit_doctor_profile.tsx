@@ -57,7 +57,6 @@ export default function EditDoctorProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Edit Your Profile</Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.card, color: colors.text, borderColor: colors.border }]}
         placeholder="Full Name"
@@ -81,6 +80,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    paddingTop: 60,
   },
   title: {
     fontSize: 22,
