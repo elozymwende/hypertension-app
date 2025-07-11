@@ -1,6 +1,6 @@
-import { Tabs } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../global.js';
 
 export default function TabsLayout() {
@@ -38,7 +38,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      {/* --- ADD THIS NEW TAB --- */}
       <Tabs.Screen
         name="profile"
         options={{
@@ -55,13 +54,18 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   activeTab: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 55,
+    height: 55,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
   inactiveTab: {
-    padding: 12,
+    width: 55,
+    height: 55,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba:(255, 255, 255, 0.1)'
   },
 });

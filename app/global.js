@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { useColorScheme } from 'react-native';
 import { initializeApp } from "firebase/app";
+import React, { createContext, useContext } from 'react';
 // --- START FIREBASE CONFIG ---
 
 const firebaseConfig = {
@@ -30,7 +29,7 @@ const darkTheme = {
   primary: '#81E6D9',
   primaryText: '#1A202C',
   tabBar: '#2D3748',
-  tabIcon: '#718096',
+  tabIcon: '#ababab',
   tabIconActive: '#FFFFFF',
 };
 
@@ -51,3 +50,4 @@ const ThemeProvider = ({ children }) => {
 export const useTheme = () => useContext(ThemeContext);
 
 export { ThemeProvider }; // Use a named export for the provider
+
