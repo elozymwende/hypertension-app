@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "hypertension_app_expo",
+    "name": "Bp Monitor",
     "slug": "hypertension_app_expo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/custom-icon.png",
     "scheme": "hypertensionappexpo",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
